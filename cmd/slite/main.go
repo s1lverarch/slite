@@ -19,7 +19,7 @@ const banner = `
   \|____|\  \ \  \____\ \  \   \ \  \ \ \  \_|\ \
     ____\_\  \ \_______\ \__\   \ \__\ \ \_______\
    |\_________\|_______|\|__|    \|__|  \|_______|
-   \|_________|                        Version 1.8.26
+   \|_________|                    Version 1.8.26
 
 Slite — independent rootless container engine (proot-based)
 No distrobox, no podman, no daemon.
@@ -104,7 +104,7 @@ func main() {
 }
 
 func printHelp() {
-	fmt.Println(banner)
+	fmt.Print(banner)
 	fmt.Println("Usage:")
 	fmt.Println("  slite create  <distro> <name>     Create a capsule from a base distro")
 	fmt.Println("  slite enter   <name>              Enter a capsule shell")
@@ -141,4 +141,3 @@ func fatal(msg string) {
 	fmt.Fprintln(os.Stderr, "error:", msg)
 	os.Exit(1)
 }
-
