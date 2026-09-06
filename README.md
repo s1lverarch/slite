@@ -1,9 +1,8 @@
 <div align="center">
 
+<img width="800" height="450" alt="ezgif-6f974939c25bc70e" src="https://github.com/user-attachments/assets/bc43ac3e-5bcb-4c21-8366-927934aafb45" />
 
-<img width="800" height="450" alt="slite" src="https://github.com/user-attachments/assets/e029ff2c-73bd-4927-8626-c58b40913bae" />
-
-## 𝓢𝓵𝓲𝓽𝓮 𝕍𝕖𝕣 𝟙.𝟡.𝟜
+## 𝓢𝓵𝓲𝓽𝓮 
 # 𝓢𝓵𝓲𝓽𝓮 𝓲𝓼 𝓪𝓷 𝓲𝓷𝓭𝓮𝓹𝓮𝓷𝓭𝓮𝓷𝓽, 𝓻𝓸𝓸𝓽𝓵𝓮𝓼𝓼 𝓬𝓸𝓷𝓽𝓪𝓲𝓷𝓮𝓻 𝓮𝓷𝓰𝓲𝓷𝓮 𝓫𝓾𝓲𝓵𝓽 𝓸𝓷 𝓹𝓻𝓸𝓸𝓽. 𝓘𝓽 𝓵𝓮𝓽𝓼 𝔂𝓸𝓾 𝓼𝓹𝓲𝓷 𝓾𝓹 𝓲𝓼𝓸𝓵𝓪𝓽𝓮𝓭 𝓛𝓲𝓷𝓾𝔁 𝓭𝓲𝓼𝓽𝓻𝓸 𝓮𝓷𝓿𝓲𝓻𝓸𝓷𝓶𝓮𝓷𝓽𝓼
 
 
