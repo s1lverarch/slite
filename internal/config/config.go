@@ -1,8 +1,16 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+)
+
+// Nerd Font icons — match main.go's palette so error messages look
+// consistent whether they surface from config, capsule, rootfs, or repo.
+const (
+	iconCross = "\uf00d" // ✕ error marker
+	iconHome  = "\uf015" //  home
 )
 
 // Paths holds every on-disk location Slite reads or writes.
@@ -20,7 +28,7 @@ func Load() (*Paths, error) {
 	if base == "" {
 		home, err := os.UserHomeDir()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf(iconCross+" resolving home directory: %w", err)
 		}
 		base = filepath.Join(home, ".slite")
 	}
@@ -34,7 +42,7 @@ func Load() (*Paths, error) {
 
 	for _, dir := range []string{p.Home, p.Capsules, p.Cache, p.RepoCache} {
 		if err := os.MkdirAll(dir, 0o755); err != nil {
-			return nil, err
+			return nil, fmt.Errorf(iconCross+" "+iconHome+" creating %s: %w", dir, err)
 		}
 	}
 	return p, nil

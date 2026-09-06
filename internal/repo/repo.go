@@ -6,10 +6,15 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/s1lverarch/slite/internal/rootfs"
 )
+
+// iconCross matches main.go's error icon so messages look consistent
+// whether they surface from the shell, capsule, rootfs, repo, or config.
+const iconCross = "\uf00d" // ✕
 
 // ManifestURL points at a JSON file hosted alongside silverarch-repo that
 // lists available base-distro rootfs images. This lets Slite pick up new
@@ -42,7 +47,7 @@ func Sync(repoCacheDir string) error {
 		// offline fallback: use whatever was cached from a previous run
 		cached, rerr := os.ReadFile(cachePath)
 		if rerr != nil {
-			return fmt.Errorf("no network and no cached manifest: %w", err)
+			return fmt.Errorf(iconCross+" no network and no cached manifest: %w", err)
 		}
 		data = cached
 	} else {
@@ -51,7 +56,7 @@ func Sync(repoCacheDir string) error {
 
 	var entries []manifestEntry
 	if err := json.Unmarshal(data, &entries); err != nil {
-		return fmt.Errorf("parsing manifest: %w", err)
+		return fmt.Errorf(iconCross+" parsing manifest: %w", err)
 	}
 
 	for _, e := range entries {
@@ -74,7 +79,7 @@ func download(url string) ([]byte, error) {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("manifest fetch failed: status %d", resp.StatusCode)
+		return nil, fmt.Errorf(iconCross+" manifest fetch failed: status %d", resp.StatusCode)
 	}
 	buf := make([]byte, 0, 4096)
 	tmp := make([]byte, 4096)
@@ -88,4 +93,29 @@ func download(url string) ([]byte, error) {
 		}
 	}
 	return buf, nil
+}
+
+// ReleaseAPIURL is GitHub's "latest release" endpoint for slite itself.
+const ReleaseAPIURL = "https://api.github.com/repos/s1lverarch/slite/releases/latest"
+
+type releaseInfo struct {
+	TagName string `json:"tag_name"`
+}
+
+// LatestVersion checks GitHub for the newest published release tag and
+// returns it with any leading "v" stripped (so it compares cleanly against
+// the version string baked into the binary at build time).
+func LatestVersion() (string, error) {
+	data, err := download(ReleaseAPIURL)
+	if err != nil {
+		return "", err
+	}
+	var r releaseInfo
+	if err := json.Unmarshal(data, &r); err != nil {
+		return "", fmt.Errorf(iconCross+" parsing release info: %w", err)
+	}
+	if r.TagName == "" {
+		return "", fmt.Errorf(iconCross+" no release tag found")
+	}
+	return strings.TrimPrefix(r.TagName, "v"), nil
 }

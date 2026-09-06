@@ -8,6 +8,10 @@ import (
 	"path/filepath"
 )
 
+// iconCross matches main.go's error icon so messages look consistent
+// whether they surface from the shell, capsule, rootfs, repo, or config.
+const iconCross = "\uf00d" // ✕
+
 // ArchiveType tells the extractor which decompressor to use.
 type ArchiveType string
 
@@ -68,9 +72,14 @@ func Lookup(alias string) (Entry, bool) {
 	return e, ok
 }
 
+// ProgressFunc is called repeatedly during download with real byte counts.
+// total is 0 if the server didn't send Content-Length (progress bar should
+// fall back to a spinner in that case — never fake the percentage).
+type ProgressFunc func(downloaded, total int64)
+
 // Fetch downloads (or reuses a cached copy of) a distro's rootfs archive
-// and returns the path to the local file.
-func Fetch(cacheDir string, e Entry) (string, error) {
+// and returns the path to the local file. Reports real progress via cb.
+func Fetch(cacheDir string, e Entry, cb ProgressFunc) (string, error) {
 	dest := filepath.Join(cacheDir, fmt.Sprintf("%s.%s", e.Alias, e.Type))
 	if _, err := os.Stat(dest); err == nil {
 		return dest, nil // already cached
@@ -91,12 +100,35 @@ func Fetch(cacheDir string, e Entry) (string, error) {
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		os.Remove(tmp)
-		return "", fmt.Errorf("download failed: %s (status %d)", e.URL, resp.StatusCode)
+		return "", fmt.Errorf(iconCross+" download failed: %s (status %d)", e.URL, resp.StatusCode)
 	}
 
-	if _, err := io.Copy(out, resp.Body); err != nil {
-		os.Remove(tmp)
-		return "", err
+	total := resp.ContentLength // -1 if unknown; we normalize to 0 for the caller
+	if total < 0 {
+		total = 0
+	}
+
+	var written int64
+	buf := make([]byte, 256*1024)
+	for {
+		n, rerr := resp.Body.Read(buf)
+		if n > 0 {
+			if _, werr := out.Write(buf[:n]); werr != nil {
+				os.Remove(tmp)
+				return "", werr
+			}
+			written += int64(n)
+			if cb != nil {
+				cb(written, total)
+			}
+		}
+		if rerr == io.EOF {
+			break
+		}
+		if rerr != nil {
+			os.Remove(tmp)
+			return "", rerr
+		}
 	}
 	out.Close()
 

@@ -10,6 +10,10 @@ import (
 	"github.com/s1lverarch/slite/internal/rootfs"
 )
 
+// iconCross matches main.go's error icon so messages look consistent
+// whether they surface from the shell, capsule, rootfs, repo, or config.
+const iconCross = "\uf00d" // ✕
+
 // Manager operates on capsules rooted at a given capsules directory.
 type Manager struct {
 	CapsulesDir string
@@ -30,21 +34,37 @@ func (m *Manager) Exists(name string) bool {
 	return err == nil
 }
 
+// CreateProgress is like Create, but reports real progress at each phase.
+// phase is one of: "download", "extract", "configure".
+type CreateProgress func(phase string, downloaded, total int64)
+
 // Create downloads (if needed) and extracts a base distro rootfs into a new
 // capsule directory, then writes a marker file recording which package
-// manager that capsule uses.
+// manager that capsule uses. Kept for callers that don't need progress.
 func (m *Manager) Create(alias, name string) error {
+	return m.CreateWithProgress(alias, name, nil)
+}
+
+// CreateWithProgress is Create, but with a real progress callback for the
+// download phase (byte-accurate, from rootfs.Fetch) and simple phase
+// markers for extract/configure so the caller can drive a spinner.
+func (m *Manager) CreateWithProgress(alias, name string, onProgress CreateProgress) error {
 	entry, ok := rootfs.Lookup(alias)
 	if !ok {
-		return fmt.Errorf("unknown base distro alias %q", alias)
+		return fmt.Errorf(iconCross+" unknown base distro alias %q", alias)
 	}
 	if m.Exists(name) {
-		return fmt.Errorf("capsule %q already exists", name)
+		return fmt.Errorf(iconCross+" capsule %q already exists", name)
 	}
 
-	archive, err := rootfs.Fetch(m.CacheDir, entry)
+	var fetchCb rootfs.ProgressFunc
+	if onProgress != nil {
+		fetchCb = func(downloaded, total int64) { onProgress("download", downloaded, total) }
+	}
+
+	archive, err := rootfs.Fetch(m.CacheDir, entry, fetchCb)
 	if err != nil {
-		return fmt.Errorf("fetching rootfs: %w", err)
+		return fmt.Errorf(iconCross+" fetching rootfs: %w", err)
 	}
 
 	target := m.path(name)
@@ -52,16 +72,23 @@ func (m *Manager) Create(alias, name string) error {
 		return err
 	}
 
+	if onProgress != nil {
+		onProgress("extract", 0, 0)
+	}
 	if err := extract(archive, entry.Type, target); err != nil {
 		os.RemoveAll(target)
-		return fmt.Errorf("extracting rootfs: %w", err)
+		return fmt.Errorf(iconCross+" extracting rootfs: %w", err)
+	}
+
+	if onProgress != nil {
+		onProgress("configure", 0, 0)
 	}
 
 	// Arch's bootstrap tarball nests everything under root.x86_64/
 	nested := filepath.Join(target, "root.x86_64")
 	if info, err := os.Stat(nested); err == nil && info.IsDir() {
 		if err := flatten(nested, target); err != nil {
-			return fmt.Errorf("flattening arch bootstrap: %w", err)
+			return fmt.Errorf(iconCross+" flattening arch bootstrap: %w", err)
 		}
 	}
 
@@ -84,7 +111,7 @@ func extract(archive string, t rootfs.ArchiveType, dest string) error {
 	case rootfs.TarZst:
 		flag = "--zstd"
 	default:
-		return fmt.Errorf("unsupported archive type %q", t)
+		return fmt.Errorf(iconCross+" unsupported archive type %q", t)
 	}
 
 	var cmd *exec.Cmd
@@ -125,7 +152,7 @@ func (m *Manager) PkgMgr(name string) (string, error) {
 // emulation. If cmdArgs is empty it drops into an interactive login shell.
 func (m *Manager) Exec(name string, cmdArgs []string) error {
 	if !m.Exists(name) {
-		return fmt.Errorf("capsule %q not found", name)
+		return fmt.Errorf(iconCross+" capsule %q not found", name)
 	}
 	target := m.path(name)
 
@@ -147,7 +174,7 @@ func (m *Manager) Exec(name string, cmdArgs []string) error {
 
 	prootPath, err := exec.LookPath("proot")
 	if err != nil {
-		return fmt.Errorf("proot not found in PATH — install it first")
+		return fmt.Errorf(iconCross+" proot not found in PATH — install it first")
 	}
 
 	// Replace this process image entirely (like exec.Cmd but with true exec(2))
@@ -170,7 +197,7 @@ func (m *Manager) InstallCmd(pkgMgr, pkg string) ([]string, error) {
 	case "xbps":
 		return []string{"bash", "-lc", "xbps-install -Sy " + pkg}, nil
 	default:
-		return nil, fmt.Errorf("no install command known for package manager %q", pkgMgr)
+		return nil, fmt.Errorf(iconCross+" no install command known for package manager %q", pkgMgr)
 	}
 }
 
@@ -192,7 +219,7 @@ func (m *Manager) List() ([]string, error) {
 // Remove deletes a capsule entirely.
 func (m *Manager) Remove(name string) error {
 	if !m.Exists(name) {
-		return fmt.Errorf("capsule %q not found", name)
+		return fmt.Errorf(iconCross+" capsule %q not found", name)
 	}
 	return os.RemoveAll(m.path(name))
 }

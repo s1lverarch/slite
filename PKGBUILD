@@ -1,6 +1,6 @@
 # Maintainer: Silvercore <s1lv3rcore@proton.me>
 pkgname=slite
-pkgver=1.8.26
+pkgver=1.9.4
 pkgrel=1
 pkgdesc="Independent rootless container engine (proot-based) — no distrobox/podman required"
 arch=('x86_64' 'aarch64')
