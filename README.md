@@ -1,5 +1,12 @@
 <div align="center">
 
+
+<img width="800" height="450" alt="slite" src="https://github.com/user-attachments/assets/e029ff2c-73bd-4927-8626-c58b40913bae" />
+
+## 𝓢𝓵𝓲𝓽𝓮 𝕍𝕖𝕣 𝟙.𝟡.𝟜
+# 𝓢𝓵𝓲𝓽𝓮 𝓲𝓼 𝓪𝓷 𝓲𝓷𝓭𝓮𝓹𝓮𝓷𝓭𝓮𝓷𝓽, 𝓻𝓸𝓸𝓽𝓵𝓮𝓼𝓼 𝓬𝓸𝓷𝓽𝓪𝓲𝓷𝓮𝓻 𝓮𝓷𝓰𝓲𝓷𝓮 𝓫𝓾𝓲𝓵𝓽 𝓸𝓷 𝓹𝓻𝓸𝓸𝓽. 𝓘𝓽 𝓵𝓮𝓽𝓼 𝔂𝓸𝓾 𝓼𝓹𝓲𝓷 𝓾𝓹 𝓲𝓼𝓸𝓵𝓪𝓽𝓮𝓭 𝓛𝓲𝓷𝓾𝔁 𝓭𝓲𝓼𝓽𝓻𝓸 𝓮𝓷𝓿𝓲𝓻𝓸𝓷𝓶𝓮𝓷𝓽𝓼
+
+
 <img src="https://readme-typing-svg.demolab.com/?font=JetBrains+Mono&weight=700&size=26&pause=1000&color=4DA6FF&center=true&vCenter=true&width=650&lines=Slite;Rootless+Container+Engine;No+distrobox.+No+podman.+No+daemon.;50+Linux+Distros%2C+One+CLI." alt="Typing SVG" />
 
 <br>
@@ -117,7 +124,7 @@ sudo pacman -S proot curl tar
 $ slite
 ```
 
-<div align="center">
+<div align="left">
 
 ```
 ███████╗██╗     ██╗████████╗███████╗
@@ -269,6 +276,6 @@ go vet ./...
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=1,5,12,20&height=120&section=footer&text=&fontColor=fff" width="100%" />
 
-**Made with 💙 in Tunis 🇹🇳**
+**Made with 💙 in Tunisia 🇹🇳**
 
 </div>
